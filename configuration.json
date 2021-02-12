@@ -1,0 +1,31 @@
+[
+  {
+    "key": "domain",
+    "type": "input",
+    "defaultValue": "",
+    "templateOptions": {
+      "label": "Domain",
+      "required": true
+    }
+  },
+  {
+    "key": "clientId",
+    "type": "input",
+    "defaultValue": "",
+    "templateOptions": {
+      "label": "Client ID",
+      "type": "password",
+      "required": true
+    }
+  },
+  {
+    "key": "secret",
+    "type": "input",
+    "defaultValue": "",
+    "templateOptions": {
+      "label": "Secret",
+      "type": "password",
+      "required": true
+    }
+  }
+]
