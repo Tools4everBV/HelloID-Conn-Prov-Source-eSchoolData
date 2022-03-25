@@ -51,7 +51,6 @@ do
     $parameters = @{
         pagesize = 1000;
         pageNo = $page;
-        includeHomeroom = "true";
     }
     $uri = "$($config.baseurl)/v1/schools"
     Write-Verbose -Verbose "Page $page";
