@@ -1,5 +1,3 @@
-#2021-02-12
-
 #Configuration
 $config = ConvertFrom-Json $configuration;
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12;
@@ -26,7 +24,7 @@ $authorization = @{
 #Get Students
 Write-Verbose -Verbose "Retrieving Students"
 $page = 1;
-$persons = $null;
+$persons = @();
 do
 {
     $parameters = @{
@@ -38,20 +36,55 @@ do
     Write-Verbose -Verbose "Page $page";
     $response = Invoke-RestMethod $uri -Method GET -Headers $authorization -Body $parameters
     
-    if ($persons -eq $null)
-    {        
-        $persons = $response.students;
-    }
-    else
-    {
-        $persons += $response.students;
-    }
+    $persons += $response.students;
 
     $page = $response.pagingInfo.pageNo + 1;   
 
 } while ($response.pagingInfo.pageNo -ne $response.pagingInfo.pageCount -or $response.pagingInfo.pageCount -eq 0)
 
+#Get Schools
+Write-Verbose -Verbose "Retrieving Schools"
+$page = 1;
+$schools = @();
+do
+{
+    $parameters = @{
+        pagesize = 1000;
+        pageNo = $page;
+        includeHomeroom = "true";
+    }
+    $uri = "$($config.baseurl)/v1/schools"
+    Write-Verbose -Verbose "Page $page";
+    $response = Invoke-RestMethod $uri -Method GET -Headers $authorization -Body $parameters
+    
+    $schools += $response.schools;
 
-#TODO Add contracts to persons
+    $page = $response.pagingInfo.pageNo + 1;   
 
-Write-Output ($persons | ConvertTo-Json -Depth 10);
+} while ($response.pagingInfo.pageNo -ne $response.pagingInfo.pageCount -or $response.pagingInfo.pageCount -eq 0)
+
+foreach ($person in $persons)
+{
+    $student = $person;
+    $student | Add-Member -Name "ExternalId" -Value $person.userId -MemberType NoteProperty;
+    $student | Add-Member -Name "DisplayName" -Value "$($person.firstName) $($person.lastName) ($($person.userId))" -MemberType NoteProperty;
+    $student | Add-Member -Name "School" -Value ($schools | Where-Object { $_.id -eq $person.schoolId }) -MemberType NoteProperty;
+
+    if ($null -eq $student.dateEnteredDistrict || $student.dateEnteredDistrict -eq "")
+    {
+        $student.dateEnteredDistrict = "0001-01-01T00:00:00"
+    }
+
+    if ($null -eq $student.projectGradDate || $student.projectGradDate -eq "")
+    {
+        $student.projectGradDate = "9999-12-31T23:59:999"
+    }
+
+    $contract = @(@{  
+        'StartDate' = $student.dateEnteredDistrict;
+        'EndDate' = $student.projectGradDate;
+    });
+
+    $student | Add-Member -Name "Contracts" -Value $contract -MemberType NoteProperty;
+    Write-Output ($student | ConvertTo-Json -Depth 10);
+}
