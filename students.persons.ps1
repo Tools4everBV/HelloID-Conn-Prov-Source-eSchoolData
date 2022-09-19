@@ -32,7 +32,7 @@ do
         pageNo = $page;
         includeHomeroom = "true";
     }
-    $uri = "$($config.baseurl)/v1/students"
+    $uri = "$($config.domain)/v1/students"
     Write-Verbose -Verbose "Page $page";
     $response = Invoke-RestMethod $uri -Method GET -Headers $authorization -Body $parameters
     
@@ -52,7 +52,7 @@ do
         pagesize = 1000;
         pageNo = $page;
     }
-    $uri = "$($config.baseurl)/v1/schools"
+    $uri = "$($config.domain)/v1/schools"
     Write-Verbose -Verbose "Page $page";
     $response = Invoke-RestMethod $uri -Method GET -Headers $authorization -Body $parameters
     

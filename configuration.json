@@ -2,7 +2,7 @@
   {
     "key": "domain",
     "type": "input",
-    "defaultValue": "",
+    "defaultValue": "https://guru.eschooldata.com/api",
     "templateOptions": {
       "label": "Domain",
       "required": true
